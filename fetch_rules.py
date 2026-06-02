@@ -147,7 +147,9 @@ def _enrich(rule: dict) -> dict:
     for field in ("cloud_providers", "resource_types", "risk_factors"):
         val = rule.get(field)
         if isinstance(val, list):
-            rule[field] = ", ".join(val)
+            rule[field] = ", ".join(
+                v if isinstance(v, str) else json.dumps(v) for v in val
+            )
     return rule
 
 
