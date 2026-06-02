@@ -144,12 +144,18 @@ def _enrich(rule: dict) -> dict:
     rule = dict(rule)
     rule["severity_label"] = SEVERITY_MAP.get(rule.get("severity"), "Unknown")
     # Normalise list fields to comma-separated strings for CSV
-    for field in ("cloud_providers", "resource_types", "risk_factors"):
+    for field in ("cloud_providers", "risk_factors"):
         val = rule.get(field)
         if isinstance(val, list):
-            rule[field] = ", ".join(
-                v if isinstance(v, str) else json.dumps(v) for v in val
-            )
+            rule[field] = ", ".join(v if isinstance(v, str) else json.dumps(v) for v in val)
+    # resource_types is a list of dicts — extract human-readable names to match GUI "Asset types"
+    rt = rule.get("resource_types")
+    if isinstance(rt, list):
+        rule["resource_types"] = ", ".join(
+            v.get("resource_type_name") or v.get("resource_type", "")
+            if isinstance(v, dict) else str(v)
+            for v in rt
+        )
     return rule
 
 
